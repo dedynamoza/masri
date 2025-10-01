@@ -1,878 +1,546 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MASRI - Matrix Sriwijaya</title>
-    <style>
-        /* --- Variabel dan Reset Dasar --- */
-        :root {
-            --primary-color: #4a90e2;
-            --secondary-color: #ffffff;
-            --bg-color: linear-gradient(135deg, #1f2a40, #141c2c);
-            --card-bg: rgba(255, 255, 255, 0.08);
-            --border-color: rgba(255, 255, 255, 0.18);
-            --text-color: #ffffff;
-            --placeholder-color: rgba(118, 116, 116, 0.6);
-            --font-poppins: 'Poppins', sans-serif;
-        }
+  <meta charset="UTF-8">
+  <title>Managed Services</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <style>
+  body {
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    background: linear-gradient(to right, #53b1f5, #ffffff);
+    margin: 20px;
+  }
+  .container {
+    background: #fff;
+    border: 2px solid #0097a7;
+    border-radius: 8px;
+    padding: 20px;
+    width: 1300px;
+    height: 700px;
+    margin: auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  h2 {
+    text-align: center;
+    background: #00bcd4;
+    color: white;
+    padding: 10px;
+    margin: 0;
+  }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+  }
+  .row label {
+    font-weight: bold;
+    width: 200px;
+  }
+  input, select {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+  /* === TABLE === */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    table-layout: fixed;
+  }
+  table th {
+    background: #00bcd4;
+    color: white;
+    padding: 8px;
+    text-align: center;
+  }
+  table td {
+    border: 1px solid #ccc;
+    padding: 6px;
+    text-align: center;
+    vertical-align: middle;
+    word-wrap: break-word;
+  }
 
-        body {
-            font-family: var(--font-poppins);
-            color: var(--text-color);
-            background: var(--bg-color);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+  /* Kolom No lebih kecil */
+  #hardwareTable th:nth-child(1),
+  #hardwareTable td:nth-child(1),
+  #serviceTable th:nth-child(1),
+  #serviceTable td:nth-child(1) {
+    width: 20px;
+  }
+  #hardwareTable th:nth-child(2),
+  #hardwareTable td:nth-child(2),
+  #serviceTable th:nth-child(2),
+  #serviceTable td:nth-child(2) {
+    width: 40%;    /* kolom Item/Services lebih lebar */
+  }
+  #hardwareTable th:nth-child(3),
+  #hardwareTable td:nth-child(3),
+  #serviceTable th:nth-child(3),
+  #serviceTable td:nth-child(3) {
+    width: 15%;
+  }
+  #hardwareTable th:nth-child(4),
+  #hardwareTable td:nth-child(4),
+  #serviceTable th:nth-child(4),
+  #serviceTable td:nth-child(4) {
+    width: 15%;
+  }
+  #hardwareTable th:nth-child(5),
+  #hardwareTable td:nth-child(5),
+  #serviceTable th:nth-child(5),
+  #serviceTable td:nth-child(5) {
+    width: 15%;
+  }
+  #hardwareTable th:nth-child(6),
+  #hardwareTable td:nth-child(6),
+  #serviceTable th:nth-child(6),
+  #serviceTable td:nth-child(6) {
+    width: 70px;
+  }
 
-        /* --- Layout Kontainer Utama --- */
-        .container {
-            width: 100%;
-            max-width: 1600px;
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
+  table input,
+  table select {
+    width: 95%;
+    box-sizing: border-box;
+  }
 
-        .main-content {
-            display: flex;
-            gap: 15px;
-        }
+  .btn {
+    background: #00acc1;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .btn:hover {
+    background: #00838f;
+    transform: scale(1.05);
+  }
+  .delete-btn {
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
 
-        .left-panel {
-            flex: 2;
-        }
+  .summary {
+    margin-top: 15px;
+    width: 50%;
+    float: right;
+  }
+  .summary tr td {
+    padding: 5px;
+  }
+  .summary td {
+  text-align: right;
+}
+.summary td:first-child {
+  text-align: left; /* kolom label tetap kiri */
+}
+.summary select,
+.summary input {
+  float: right;
+  text-align: right; /* biar angka di dalam input juga rata kanan */
+}
 
-        .right-panel {
-            flex: 1;
-        }
 
-        /* --- Efek Glassmorphism --- */
-        .glass-effect {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            padding: 20px;
-        }
+  .download {
+    margin-top: 30px;
+  }
 
-        /* --- Header dan Tombol Export --- */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+  .select2-container {
+    width: 100% !important;
+  }
+#summaryBox {
+  display:none;
+  margin-top:20px;
+  margin-left:12px;
+  padding:10px 15px 10px 0;
+  font-style: normal;
+  white-space: normal;
+  text-align: left;
+  font-family: inherit;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
 
-        .project-info {
-            display: flex;
-            gap: 15px;
-        }
+</style>
 
-        .header input {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px 15px;
-            color: var(--text-color);
-            font-size: 16px;
-        }
-
-        .header input::placeholder {
-            color: var(--placeholder-color);
-        }
-
-        .glass-btn {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(2px);
-            border: 1px solid rgba(25, 255, 255, 0.3);
-            border-radius: 20px;
-            padding: 10px 20px;
-            color: var(--text-color);
-            font-size: 10px;
-            font-weight: 400;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .glass-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .glass-btn:active {
-            transform: translateY(0);
-        }
-
-        /* --- Tabel Umum --- */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 13px;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        th {
-            font-weight: 500;
-            color: var(--secondary-color);
-            background: rgba(255, 255, 255, 0.05);
-            text-transform: Proper;
-        }
-        
-        /* Font Proper */
-        h2, .project-info input::placeholder {
-            text-transform: Proper;
-        }
-        
-        .header .glass-btn, .bottom-actions .glass-btn, .actions .glass-btn {
-            text-transform: Proper;
-        }
-
-        td {
-            color: var(--text-color);
-        }
-
-        /* --- Dropdown dan Input Khusus --- */
-        .dropdown, input[type="text"], input[type="number"], .editable {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            padding: 8px;
-            color: var(--text-color);
-            width: 100%;
-            
-        }
-        
-        /* Menghilangkan backdrop putih pada dropdown */
-        select {
-            appearance: none;
-            -webkit-appearance: none;
-            cursor: pointer;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 8px;
-            border-radius: 5px;
-            color: var(--text-color);
-        }
-
-        /* Mengatur warna teks untuk option di dropdown */
-        select option {
-            background-color: #141c2c; /* Warna latar belakang gelap untuk opsi */
-            color: var(--text-color);
-        }
-
-        /* --- Summary Bagian Bawah Tabel --- */
-        .summary-service, .summary-investment {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
-            gap: 30px;
-            font-size: 15px;
-        }
-
-        .summary-service div:first-child {
-            text-align: right;
-            padding-right: 20px;
-        }
-        
-        .summary-service div:last-child {
-            text-align: right;
-        }
-        
-        .actions {
-            margin-top: 20px;
-        }
-
-        /* --- Tombol Hapus --- */
-        .delete-btn {
-            background: none;
-            border: none;
-            color: #ff6b6b;
-            cursor: pointer;
-            font-size: 1.2em;
-            transition: color 0.3s ease;
-        }
-
-        .delete-btn:hover {
-            color: #ff4757;
-        }
-
-        /* --- Popup Konfirmasi --- */
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .popup-content {
-            padding: 30px;
-            text-align: center;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .popup-buttons {
-            margin-top: 20px;
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-
-        /* --- Responsif (Tablet dan Mobile) --- */
-        @media (max-width: 1024px) {
-            .main-content {
-                flex-direction: column;
-            }
-
-            .right-panel {
-                width: 100%;
-                margin-top: 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-
-            .project-info {
-                width: 100%;
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .header input {
-                width: 100%;
-            }
-
-            .bottom-actions {
-                position: static;
-                margin-top: 20px;
-                text-align: center;
-            }
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <div class="project-info">
-                <input type="text" id="projectName" placeholder="Project Name" maxlength="30">
-                <input type="text" id="customerName" placeholder="Customer Name" maxlength="30">
-            </div>
-            <button id="exportExcelBtn" class="glass-btn">Export to Excel</button>
-        </header>
+<div class="container">
+  <h2>MANAGE SERVICES WEST 4</h2>
 
-        <main class="main-content">
-            <section class="left-panel">
-                <div class="card glass-effect">
-                    <div style="margin-bottom: 50px;">
-                    <h2>Tabel Layanan</h2>
-                    <table id="serviceTable">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Service</th>
-                                <th>Contract</th>
-                                <th>Monthly Rev</th>
-                                <th>Discount</th>
-                                <th>Annual Rev</th>
-                                <th class="actions-col"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            </tbody>
-                    </table>
-                </div>
-                    <div class="summary-service">
-                        <div>
+  <div class="row" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+  
+  <!-- Kiri -->
+  <div class="form-group" style="width:30%; text-align:left;">
+    <label for="customerName" style="display:block; font-weight:bold; margin-bottom:2px;">
+      Customer Name
+    </label>
+    <input type="text" id="customerName" placeholder="Enter customer name" style="width:100%;">
+  </div>
 
-                            <p>DISC:</p>
-                            <p>SUBTOTAL:</p>
-                            <p>VAT 11%:</p>
-                            <p>TOTAL:</p>
-                            <p>MATERAI:</p>
-                            <p>GRAND TOTAL:</p>
-                        </div>
-                        <div>
-                            <p id="discValue">0</p>
-                            <p id="subtotalValue">0</p>
-                            <p id="vatValue">0</p>
-                            <p id="totalValue">0</p>
-                            <p id="materaiValue">10.000</p>
-                            <p id="grandTotalValue">0</p>
-                        </div>
-                    </div>
-                    <div class="actions">
-                        <button id="addServiceBtn" class="glass-btn">Tambah</button>
-                    </div>
-                </div>
+  <!-- Tengah -->
+  <div class="form-group" style="width:30%; text-align:center;">
+    <label for="projectDesc" style="display:block; font-weight:bold; margin-bottom:2px;">
+      Project Description
+    </label>
+    <input type="text" id="projectDesc" placeholder="Enter project description" style="width:80%; margin:auto; display:block;">
+  </div>
 
-                <div class="card glass-effect mt-20">
-                    <h2>Tabel Investasi</h2>
-                    <table id="investmentTable">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Description</th>
-                                <th>Type</th>
-                                <th>Qty</th>
-                                <th>Unit Price</th>
-                                <th>Total Price</th>
-                                <th class="actions-col"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            </tbody>
-                    </table>
-                    <div class="summary-investment">
-                        <p>TOTAL INVESTMENT:</p>
-                        <p id="totalInvestmentValue">0</p>
-                    </div>
-                    <div class="actions">
-                        <button id="addInvestmentBtn" class="glass-btn">Tambah</button>
-                    </div>
-                </div>
-            </section>
+  <!-- Kanan -->
+  <div class="form-group" style="width:30%; text-align:right;">
+    <label for="date" style="display:block; font-weight:bold; margin-bottom:2px; text-align:right;">
+      Date
+    </label>
+    <input type="date" id="date" style="width:80%;">
+  </div>
 
-            <section class="right-panel">
-                <div class="card glass-effect summary-card">
-                    <h2>Ringkasan</h2>
-                    <table id="summaryTable">
-                        <thead>
-                            <tr>
-                                <th>Keterangan</th>
-                                <th>Nilai</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            </tbody>
-                    </table>
-                </div>
-            </section>
-        </main>
+</div>
 
-        <div class="bottom-actions">
-            <button id="calculateRoiBtn" class="glass-btn">CALCULATE ROI</button>
-        </div>
+  <h3>Hardware Table</h3>
+  <table id="hardwareTable">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Item Description</th>
+        <th>Qty</th>
+        <th>Unit Price</th>
+        <th>Ext Price</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td><input type="text" placeholder="Item"></td>
+        <td><input type="text" class="qty"></td>
+        <td><input type="text" class="unitPrice"></td>
+        <td class="extPrice">0</td>
+        <td><button class="btn addHardware">+</button></td>
+      </tr>
+    </tbody>
+  </table>
 
-        <div id="deletePopup" class="popup-overlay">
-            <div class="popup-content glass-effect">
-                <p>Yakin mau dihapus?</p>
-                <div class="popup-buttons">
-                    <button id="confirmDelete" class="glass-btn">Ya</button>
-                    <button id="cancelDelete" class="glass-btn">Tidak</button>
-                </div>
-            </div>
-        </div>
-    </div>
+  <h3>Service Table</h3>
+  <table id="serviceTable">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Services</th>
+        <th>Contract</th>
+        <th>Revenue</th>
+        <th>Ext Revenue</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>
+          <select class="serviceSelect">
+            <option value="">-- Select Service --</option>
+            <!-- Services inserted here -->
+          </select>
+        </td>
+        <td>
+          <select class="contract">
+            <option>12</option>
+            <option>24</option>
+            <option>36</option>
+            <option selected>1</option>
+          </select>
+        </td>
+        <td class="revenue">0</td>
+        <td class="extRevenue">0</td>
+        <td><button class="btn addService">+</button></td>
+      </tr>
+    </tbody>
+  </table>
 
-    <script>
-        // --- Data Dropdown (Berdasarkan source.xlsx - Sheet1.csv) ---
-        const serviceData = [
-            { name: "Biznet Dedicated Internet 80 Mbps", monthlyRev: 5200000 },
-            { name: "Biznet Dedicated Internet 100 Mbps", monthlyRev: 6500000 },
-            { name: "Biznet Dedicated Internet 120 Mbps", monthlyRev: 7410000 },
-            { name: "Biznet Dedicated Internet 160 Mbps", monthlyRev: 9880000 },
-            { name: "Biznet Dedicated Internet 200 Mbps", monthlyRev: 12350000 },
-            { name: "Biznet Dedicated Internet 240 Mbps", monthlyRev: 14040000 },
-            { name: "Biznet Dedicated Internet 280 Mbps", monthlyRev: 16380000 },
-            { name: "Biznet Dedicated Internet 320 Mbps", monthlyRev: 18720000 },
-            { name: "Biznet Dedicated Internet 360 Mbps", monthlyRev: 21060000 },
-            { name: "Biznet Dedicated Internet 400 Mbps", monthlyRev: 23400000 },
-            { name: "Biznet Dedicated Internet 500 Mbps", monthlyRev: 27625000 },
-            { name: "Biznet Dedicated Internet 600 Mbps", monthlyRev: 33150000 },
-            { name: "Biznet Dedicated Internet 700 Mbps", monthlyRev: 38675000 },
-            { name: "Biznet Dedicated Internet 800 Mbps", monthlyRev: 44200000 },
-            { name: "Biznet Dedicated Internet 900 Mbps", monthlyRev: 49725000 },
-            { name: "Biznet Dedicated Internet 1 Gbps", monthlyRev: 55250000 },
-            { name: "Biznet Dedicated Internet 1.2 Gbps", monthlyRev: 66300000 },
-            { name: "Biznet Dedicated Internet 1.6 Gbps", monthlyRev: 88400000 },
-            { name: "Biznet Dedicated Internet 2 Gbps", monthlyRev: 110500000 },
-            { name: "Biznet Dedicated Internet 3 Gbps", monthlyRev: 156000000 },
-            { name: "Biznet Dedicated Internet 4 Gbps", monthlyRev: 208000000 },
-            { name: "Biznet Dedicated Internet 5 Gbps", monthlyRev: 260000000 },
-            { name: "Biznet Dedicated Internet 6 Gbps", monthlyRev: 312000000 },
-            { name: "Biznet Dedicated Internet 7 Gbps", monthlyRev: 364000000 },
-            { name: "Biznet Dedicated Internet 8 Gbps", monthlyRev: 416000000 },
-            { name: "Biznet Dedicated Internet 9 Gbps", monthlyRev: 468000000 },
-            { name: "Biznet Dedicated Internet 10 Gbps", monthlyRev: 520000000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 100 Mbps", monthlyRev: 2210000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 200 Mbps", monthlyRev: 4420000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 300 Mbps", monthlyRev: 6630000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 400 Mbps", monthlyRev: 8840000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 500 Mbps", monthlyRev: 11050000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 600 Mbps", monthlyRev: 13260000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 700 Mbps", monthlyRev: 15470000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 800 Mbps", monthlyRev: 17680000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 900 Mbps", monthlyRev: 19890000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 1 Gbps", monthlyRev: 22100000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 1.2 Gbps", monthlyRev: 26520000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 1.6 Gbps", monthlyRev: 35360000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 2 Gbps", monthlyRev: 44200000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 3 Gbps", monthlyRev: 62400000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 4 Gbps", monthlyRev: 83200000 },
-            { name: "Biznet Dedicated Educationnet/Healthnet 10 Gbps", monthlyRev: 188500000 },
-            { name: "Biznet Dedicated Hospitalitynet 80 Mbps", monthlyRev: 3120000 },
-            { name: "Biznet Dedicated Hospitalitynet 100 Mbps", monthlyRev: 3900000 },
-            { name: "Biznet Dedicated Hospitalitynet 120 Mbps", monthlyRev: 4446000 },
-            { name: "Biznet Dedicated Hospitalitynet 160 Mbps", monthlyRev: 5928000 },
-            { name: "Biznet Dedicated Hospitalitynet 200 Mbps", monthlyRev: 7410000 },
-            { name: "Biznet Dedicated Hospitalitynet 240 Mbps", monthlyRev: 8424000 },
-            { name: "Biznet Dedicated Hospitalitynet 280 Mbps", monthlyRev: 9828000 },
-            { name: "Biznet Dedicated Hospitalitynet 320 Mbps", monthlyRev: 11232000 },
-            { name: "Biznet Dedicated Hospitalitynet 360 Mbps", monthlyRev: 12636000 },
-            { name: "Biznet Dedicated Hospitalitynet 400 Mbps", monthlyRev: 14040000 },
-            { name: "Biznet Dedicated Hospitalitynet 500 Mbps", monthlyRev: 16575000 },
-            { name: "Biznet Dedicated Hospitalitynet 600 Mbps", monthlyRev: 19890000 },
-            { name: "Biznet Dedicated Hospitalitynet 700 Mbps", monthlyRev: 23205000 },
-            { name: "Biznet Dedicated Hospitalitynet 800 Mbps", monthlyRev: 26520000 },
-            { name: "Biznet Dedicated Hospitalitynet 900 Mbps", monthlyRev: 29835000 },
-            { name: "Biznet Dedicated Hospitalitynet 1 Gbps", monthlyRev: 33150000 },
-            { name: "Biznet Dedicated Hospitalitynet 1.2 Gbps", monthlyRev: 39780000 },
-            { name: "Biznet Dedicated Hospitalitynet 1.6 Gbps", monthlyRev: 53040000 },
-            { name: "Biznet Dedicated Hospitalitynet 2 Gbps", monthlyRev: 66300000 },
-            { name: "Biznet Dedicated Hospitalitynet 3 Gbps", monthlyRev: 93600000 },
-            { name: "Biznet Dedicated Hospitalitynet 4 Gbps", monthlyRev: 124800000 },
-            { name: "Biznet Dedicated Hospitalitynet 10 Gbps", monthlyRev: 282750000 }
-        ];
+  <table class="summary">
+    <tr>
+      <td>Discount</td>
+      <td>
+        <select id="discount">
+          <option value="0"selected>0%</option>
+          <option value="15">15%</option>
+          <option value="20">20%</option>
+          <option value="25" >25%</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Installation Fee</td>
+      <td><input type="text" id="installationFee" value="0"></td>
+    </tr>
+    <tr>
+      <td><b>Total Revenue</b></td>
+      <td><b id="totalRevenue">0</b></td>
+    </tr>
+    <tr>
+      <td>Hardware Cost %</td>
+      <td id="hardwareCost">0%</td>
+    </tr>
+  </table>
 
-        const investmentData = [
-            "Network Hardware",
-            "Electricity",
-            "Electronic Items",
-            "Cables",
-            "Pole"
-        ];
+  <div class="download">
+  <button class="btn" id="summaryBtn" onclick="toggleSummary()">Show Monthly Summary</button>
+</div>
+<div id="summaryBox"></div>
 
-        // --- Elemen DOM ---
-        const serviceTableBody = document.querySelector("#serviceTable tbody");
-        const investmentTableBody = document.querySelector("#investmentTable tbody");
-        const addServiceBtn = document.getElementById("addServiceBtn");
-        const addInvestmentBtn = document.getElementById("addInvestmentBtn");
-        const calculateRoiBtn = document.getElementById("calculateRoiBtn");
-        const exportExcelBtn = document.getElementById("exportExcelBtn");
-        const deletePopup = document.getElementById("deletePopup");
-        const confirmDeleteBtn = document.getElementById("confirmDelete");
-        const cancelDeleteBtn = document.getElementById("cancelDelete");
-        const projectNameInput = document.getElementById("projectName");
-        const customerNameInput = document.getElementById("customerName");
+</div>
 
-        let serviceRowCounter = 1;
-        let investmentRowCounter = 1;
-        let rowToDelete = null;
+<script>
+  const servicesData = [
+    ["Biznet Dedicated Internet 80 Mbps",5200000,2000000],
+    ["Biznet Dedicated Internet 100 Mbps",6500000,2000000],
+    ["Biznet Dedicated Internet 120 Mbps",7410000,2000000],
+    ["Biznet Dedicated Internet 160 Mbps",9880000,2000000],
+    ["Biznet Dedicated Internet 200 Mbps",12350000,5000000],
+    ["Biznet Dedicated Internet 240 Mbps",14040000,5000000],
+    ["Biznet Dedicated Internet 280 Mbps",16380000,5000000],
+    ["Biznet Dedicated Internet 320 Mbps",18720000,5000000],
+    ["Biznet Dedicated Internet 360 Mbps",21060000,5000000],
+    ["Biznet Dedicated Internet 400 Mbps",23400000,10000000],
+    ["Biznet Dedicated Internet 500 Mbps",27625000,10000000],
+    ["Biznet Dedicated Internet 600 Mbps",33150000,10000000],
+    ["Biznet Dedicated Internet 700 Mbps",38675000,10000000],
+    ["Biznet Dedicated Internet 800 Mbps",44200000,10000000],
+    ["Biznet Dedicated Internet 900 Mbps",49725000,10000000],
+    ["Biznet Dedicated Internet 1 Gbps",55250000,10000000],
+    ["Biznet Dedicated Internet 1.2 Gbps",66300000,10000000],
+    ["Biznet Dedicated Internet 1.6 Gbps",88400000,10000000],
+    ["Biznet Dedicated Internet 2 Gbps",110500000,15000000],
+    ["Biznet Dedicated Internet 3 Gbps",156000000,15000000],
+    ["Biznet Dedicated Internet 4 Gbps",208000000,15000000],
+    ["Biznet Dedicated Internet 10 Gbps",471250000,25000000],
+    ["Biznet Dedicated Educationnet/Healthnet 160 Mbps",3952000,2000000],
+    ["Biznet Dedicated Educationnet/Healthnet 200 Mbps",4940000,5000000],
+    ["Biznet Dedicated Educationnet/Healthnet 240 Mbps",5616000,5000000],
+    ["Biznet Dedicated Educationnet/Healthnet 280 Mbps",6552000,5000000],
+    ["Biznet Dedicated Educationnet/Healthnet 320 Mbps",7488000,5000000],
+    ["Biznet Dedicated Educationnet/Healthnet 360 Mbps",8424000,5000000],
+    ["Biznet Dedicated Educationnet/Healthnet 400 Mbps",9360000,10000000],
+    ["Biznet Dedicated Educationnet/Healthnet 500 Mbps",11050000,10000000],
+    ["Biznet Dedicated Educationnet/Healthnet 600 Mbps",13260000,10000000],
+    ["Biznet Dedicated Educationnet/Healthnet 700 Mbps",15470000,10000000],
+    ["Biznet Dedicated Educationnet/Healthnet 800 Mbps",17680000,10000000],
+    ["Biznet Dedicated Educationnet/Healthnet 900 Mbps",19890000,10000000],
+    ["Biznet Dedicated Educationnet/Healthnet 1 Gbps",22100000,10000000],
+    ["Biznet Dedicated Educationnet/Healthnet 1.2 Gbps",26520000,10000000],
+    ["Biznet Dedicated Educationnet/Healthnet 1.6 Gbps",35360000,10000000],
+    ["Biznet Dedicated Educationnet/Healthnet 2 Gbps",44200000,15000000],
+    ["Biznet Dedicated Educationnet/Healthnet 3 Gbps",62400000,15000000],
+    ["Biznet Dedicated Educationnet/Healthnet 4 Gbps",83200000,15000000],
+    ["Biznet Dedicated Educationnet/Healthnet 10 Gbps",188500000,25000000],
+  ];
 
-        // --- Fungsi Helper ---
-        function formatRupiah(number) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
-        }
+  function populateServices(selectEl) {
+    selectEl.innerHTML = '<option value="">-- Select Service --</option>';
+    servicesData.forEach(([name, revenue, install])=>{
+      let opt = document.createElement("option");
+      opt.value = revenue;
+      opt.textContent = name;
+      opt.dataset.install = install;
+      selectEl.appendChild(opt);
+    });
+    try { $(selectEl).select2(); } catch(e) {}
+  }
 
-        // --- Fungsi CRUD Tabel ---
-        function createServiceRow(data = {}) {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${serviceRowCounter++}</td>
-                <td>
-                    <select class="service-dropdown"></select>
-                </td>
-                <td>
-                    <select class="contract-dropdown">
-                        <option value="12">12</option>
-                        <option value="24">24</option>
-                        <option value="36">36</option>
-                    </select>
-                </td>
-                <td><input type="text" class="monthly-rev" readonly></td>
-                <td>
-                    <select class="discount-dropdown"></select>
-                </td>
-                <td><input type="text" class="annual-rev" readonly></td>
-                <td class="actions-col"><button class="delete-btn">🗑️</button></td>
-            `;
-            serviceTableBody.appendChild(row);
-            initServiceRow(row);
-        }
+  function formatNumber(num) {
+    if (num === null || num === undefined || num === "") return "0";
+    return Number(num).toLocaleString('en-US');
+  }
 
-        function initServiceRow(row) {
-            const serviceDropdown = row.querySelector(".service-dropdown");
-            const contractDropdown = row.querySelector(".contract-dropdown");
-            const discountDropdown = row.querySelector(".discount-dropdown");
-            const monthlyRevInput = row.querySelector(".monthly-rev");
-            const annualRevInput = row.querySelector(".annual-rev");
+  function getNumeric(val){
+    if (val === null || val === undefined) return 0;
+    const s = String(val).replace(/[^\d\-]/g, '');
+    return s === "" || s === "-" ? 0 : Number(s);
+  }
 
-            serviceData.forEach(service => {
-                const option = document.createElement("option");
-                option.value = service.name;
-                option.textContent = service.name;
-                serviceDropdown.appendChild(option);
-            });
+  function recalcHardware() {
+    document.querySelectorAll("#hardwareTable tbody tr").forEach((row, idx) => {
+      row.children[0].innerText = idx + 1;
+      let qty = getNumeric(row.querySelector(".qty")?.value);
+      let unit = getNumeric(row.querySelector(".unitPrice")?.value);
+      let ext = qty * unit;
+      row.querySelector(".extPrice").innerText = formatNumber(ext);
+    });
+    recalcSummary();
+  }
 
-            function updateDiscountDropdown() {
-                const selectedService = serviceDropdown.value;
-                discountDropdown.innerHTML = '';
-                
-                // Atur nilai default diskon
-                const defaultOption = document.createElement("option");
-                defaultOption.value = "0%";
-                defaultOption.textContent = "0%";
-                discountDropdown.appendChild(defaultOption);
+  function recalcService() {
+    let discount = getNumeric(document.getElementById("discount").value);
 
-                if (selectedService.includes("Dedicated Internet")) {
-                    ['15%', '20%', '25%'].forEach(d => {
-                        const option = document.createElement("option");
-                        option.value = d;
-                        option.textContent = d;
-                        discountDropdown.appendChild(option);
-                    });
-                    const othersOption = document.createElement("option");
-                    othersOption.value = "Others";
-                    othersOption.textContent = "Others";
-                    discountDropdown.appendChild(othersOption);
-                } else if (selectedService.includes("Educationnet") || selectedService.includes("Healthnet")) {
-                    ['10%', '15%'].forEach(d => {
-                        const option = document.createElement("option");
-                        option.value = d;
-                        option.textContent = d;
-                        discountDropdown.appendChild(option);
-                    });
-                    const othersOption = document.createElement("option");
-                    othersOption.value = "Others";
-                    othersOption.textContent = "Others";
-                    discountDropdown.appendChild(othersOption);
-                }
-            }
+    document.querySelectorAll("#serviceTable tbody tr").forEach((row, idx) => {
+      row.children[0].innerText = idx + 1;
+      let service = row.querySelector(".serviceSelect");
+      let contract = getNumeric(row.querySelector(".contract")?.value);
+      let baseRevenue = getNumeric(service?.value);
 
-            discountDropdown.addEventListener("change", (e) => {
-                if (e.target.value === "Others") {
-                    const customDiscount = prompt("Masukkan nilai diskon (tanpa %):");
-                    if (customDiscount) {
-                        const newOption = document.createElement("option");
-                        newOption.value = `${customDiscount}%`;
-                        newOption.textContent = `${customDiscount}%`;
-                        newOption.selected = true;
-                        discountDropdown.appendChild(newOption);
-                    }
-                }
-                updateServiceCalculations();
-            });
+      let revenue = baseRevenue * (1 - discount / 100); 
+      row.querySelector(".revenue").innerText = formatNumber(revenue);
 
-            serviceDropdown.addEventListener("change", () => {
-                const selectedService = serviceData.find(s => s.name === serviceDropdown.value);
-                if (selectedService) {
-                    monthlyRevInput.value = formatRupiah(selectedService.monthlyRev);
-                    updateDiscountDropdown();
-                }
-                updateServiceCalculations();
-            });
-            
-            contractDropdown.addEventListener("change", updateServiceCalculations);
-            discountDropdown.addEventListener("change", updateServiceCalculations);
-            
-            updateDiscountDropdown();
-        }
+      let ext = revenue * contract; 
+      row.querySelector(".extRevenue").innerText = formatNumber(ext);
+    });
 
-        function updateServiceCalculations() {
-            let totalAnnualRev = 0;
-            const rows = serviceTableBody.querySelectorAll("tr");
-            
-            rows.forEach(row => {
-                const serviceName = row.querySelector(".service-dropdown").value;
-                const contract = parseInt(row.querySelector(".contract-dropdown").value);
-                const discountString = row.querySelector(".discount-dropdown").value;
-                
-                const service = serviceData.find(s => s.name === serviceName);
-                if (!service) return;
-                
-                const monthlyRev = service.monthlyRev;
-                const discountPercentage = parseFloat(discountString) / 100;
-                
-                const annualRev = (monthlyRev * contract) * (1 - discountPercentage);
-                row.querySelector(".annual-rev").value = formatRupiah(annualRev);
-                totalAnnualRev += annualRev;
-            });
+    recalcSummary();
+  }
 
-            const disc = totalAnnualRev * 0.10;
-            const subtotal = totalAnnualRev - disc;
-            const vat = subtotal * 0.11;
-            const total = subtotal + vat;
-            const materai = 10000;
-            const grandTotal = total + materai;
-            
-            document.getElementById("discValue").textContent = formatRupiah(disc);
-            document.getElementById("subtotalValue").textContent = formatRupiah(subtotal);
-            document.getElementById("vatValue").textContent = formatRupiah(vat);
-            document.getElementById("totalValue").textContent = formatRupiah(total);
-            document.getElementById("materaiValue").textContent = formatRupiah(materai);
-            document.getElementById("grandTotalValue").textContent = formatRupiah(grandTotal);
-            
-            saveToLocalStorage();
-        }
+  function recalcSummary() {
+    let totalHardware = 0, totalExtRevenue = 0;
+    document.querySelectorAll(".extPrice").forEach(td => totalHardware += getNumeric(td.innerText));
+    document.querySelectorAll(".extRevenue").forEach(td => totalExtRevenue += getNumeric(td.innerText));
 
-        function createInvestmentRow(data = {}) {
-            const row = document.createElement("tr");
-            row.dataset.id = investmentRowCounter;
-            row.innerHTML = `
-                <td>${investmentRowCounter++}</td>
-                <td>
-                    <select class="description-dropdown"></select>
-                </td>
-                <td><input type="text" class="type" maxlength="20"></td>
-                <td>
-                    <select class="qty-dropdown"></select>
-                </td>
-                <td><input type="number" class="unit-price"></td>
-                <td><input type="text" class="total-price" readonly></td>
-                <td class="actions-col"><button class="delete-btn">🗑️</button></td>
-            `;
-            investmentTableBody.appendChild(row);
-            initInvestmentRow(row);
-        }
+    let install = getNumeric(document.getElementById("installationFee").value);
 
-        function initInvestmentRow(row) {
-            const descriptionDropdown = row.querySelector(".description-dropdown");
-            const qtyDropdown = row.querySelector(".qty-dropdown");
-            const unitPriceInput = row.querySelector(".unit-price");
-            const totalPriceInput = row.querySelector(".total-price");
+    let totalRevenue = totalExtRevenue + install;
+    document.getElementById("totalRevenue").innerText = formatNumber(totalRevenue);
 
-            investmentData.forEach(item => {
-                const option = document.createElement("option");
-                option.value = item;
-                option.textContent = item;
-                descriptionDropdown.appendChild(option);
-            });
+    let hardwareCost = totalExtRevenue > 0 ? (totalHardware / totalExtRevenue * 100).toFixed(2) : "0.00";
+    document.getElementById("hardwareCost").innerText = hardwareCost + "%";
+  }
 
-            for (let i = 1; i <= 100; i++) {
-                const option = document.createElement("option");
-                option.value = i;
-                option.textContent = i;
-                qtyDropdown.appendChild(option);
-            }
-            
-            qtyDropdown.addEventListener("change", updateTotalInvestment);
-            unitPriceInput.addEventListener("input", updateTotalInvestment);
-        }
+  function handleServiceChange(el) {
+    if (!el) return;
+    const opt = el.selectedOptions && el.selectedOptions[0];
+    const installVal = opt ? getNumeric(opt.dataset.install) : 0;
+    document.getElementById("installationFee").value = formatNumber(installVal);
+    recalcService();
+  }
 
-        function updateTotalInvestment() {
-            let totalInvestment = 0;
-            const rows = investmentTableBody.querySelectorAll("tr");
-            
-            rows.forEach(row => {
-                const qty = parseInt(row.querySelector(".qty-dropdown").value) || 0;
-                const unitPrice = parseFloat(row.querySelector(".unit-price").value.replace(/\./g, '')) || 0;
-                const totalPrice = qty * unitPrice;
-                row.querySelector(".total-price").value = formatRupiah(totalPrice);
-                totalInvestment += totalPrice;
-            });
-            
-            document.getElementById("totalInvestmentValue").textContent = formatRupiah(totalInvestment);
-            saveToLocalStorage();
-        }
+  // --- Input formatting untuk Qty & Unit Price ---
+  document.addEventListener("input", e=>{
+    if (e.target.classList.contains("qty") || e.target.classList.contains("unitPrice")) {
+      e.target.value = e.target.value.replace(/[^\d]/g,""); // hanya angka
+    }
+    if(e.target.classList.contains("qty") || e.target.classList.contains("unitPrice")) recalcHardware();
+    if(e.target.classList.contains("contract")) recalcService();
+    if(e.target.id === "installationFee") recalcSummary();
+    if(e.target.id === "discount") recalcService();
+  });
 
-        serviceTableBody.addEventListener("click", (e) => {
-            if (e.target.classList.contains("delete-btn")) {
-                rowToDelete = e.target.closest("tr");
-                deletePopup.style.display = "flex";
-            }
-        });
+  document.addEventListener("focus", e => {
+    if (e.target.classList.contains("qty") || e.target.classList.contains("unitPrice")) {
+      e.target.value = getNumeric(e.target.value) || "";
+    }
+  }, true);
 
-        investmentTableBody.addEventListener("click", (e) => {
-            if (e.target.classList.contains("delete-btn")) {
-                rowToDelete = e.target.closest("tr");
-                deletePopup.style.display = "flex";
-            }
-        });
+  document.addEventListener("blur", e => {
+    if (e.target.classList.contains("qty") || e.target.classList.contains("unitPrice")) {
+      const val = getNumeric(e.target.value);
+      e.target.value = val ? formatNumber(val) : "";
+      recalcHardware();
+    }
+  }, true);
 
-        confirmDeleteBtn.addEventListener("click", () => {
-            if (rowToDelete) {
-                rowToDelete.remove();
-                if (rowToDelete.closest("table").id === "serviceTable") {
-                    updateServiceCalculations();
-                    updateRowNumbers(serviceTableBody);
-                } else {
-                    updateTotalInvestment();
-                    updateRowNumbers(investmentTableBody);
-                }
-                rowToDelete = null;
-            }
-            deletePopup.style.display = "none";
-        });
+  $(document).on('change', '.serviceSelect', function(e){
+    handleServiceChange(this);
+  });
 
-        cancelDeleteBtn.addEventListener("click", () => {
-            rowToDelete = null;
-            deletePopup.style.display = "none";
-        });
+  document.addEventListener("click", e=>{
+    if(e.target.classList.contains("addHardware")){
+      let row = e.target.closest("tr").cloneNode(true);
+      row.querySelectorAll("input").forEach(i=>i.value="");
+      row.querySelector(".extPrice").innerText="0";
+      row.querySelector("td:last-child").innerHTML='<button class="delete-btn">🗑</button>';
+      document.querySelector("#hardwareTable tbody").appendChild(row);
+      recalcHardware();
+    }
+    if(e.target.classList.contains("addService")){
+      let row = e.target.closest("tr").cloneNode(true);
+      let select = row.querySelector(".serviceSelect");
+      populateServices(select);
+      row.querySelector(".revenue").innerText="0";
+      row.querySelector(".extRevenue").innerText="0";
+      row.querySelector("td:last-child").innerHTML='<button class="delete-btn">🗑</button>';
+      document.querySelector("#serviceTable tbody").appendChild(row);
+      recalcService();
+    }
+    if(e.target.classList.contains("delete-btn")){
+      e.target.closest("tr").remove();
+      recalcHardware();
+      recalcService();
+    }
+  });
 
-        function updateRowNumbers(tableBody) {
-            const rows = tableBody.querySelectorAll("tr");
-            rows.forEach((row, index) => {
-                row.querySelector("td:first-child").textContent = index + 1;
-            });
-        }
+  function toggleSummary() {
+    const box = document.getElementById("summaryBox");
+    const btn = document.getElementById("summaryBtn");
+    if (box.style.display === "none" || box.style.display === "") {
+      // show
+      showSummary();
+      btn.textContent = "Hide Summary";
+    } else {
+      // hide
+      box.style.display = "none";
+      btn.textContent = "Show Summary";
+    }
+  }
 
-        addServiceBtn.addEventListener("click", () => {
-            createServiceRow();
-            updateRowNumbers(serviceTableBody);
-            updateServiceCalculations();
-            saveToLocalStorage();
-        });
+  function showSummary() {
+  // ambil total revenue untuk summary (sum dari revenue * 1, selalu contract=1)
+  let totalRevenueForSummary = 0;
+  document.querySelectorAll("#serviceTable tbody tr").forEach(row => {
+    let revenue = getNumeric(row.querySelector(".revenue").innerText);
+    totalRevenueForSummary += revenue;
+  });
 
-        addInvestmentBtn.addEventListener("click", () => {
-            createInvestmentRow();
-            updateRowNumbers(investmentTableBody);
-            updateTotalInvestment();
-            saveToLocalStorage();
-        });
+  // ambil installation fee (input)
+  const install = getNumeric(document.getElementById("installationFee").value);
 
-        calculateRoiBtn.addEventListener("click", () => {
-            const serviceName = serviceTableBody.querySelector(".service-dropdown").value;
-            const monthlyRevString = serviceTableBody.querySelector(".monthly-rev").value;
-            const annualRevString = serviceTableBody.querySelector(".annual-rev").value;
-            const totalInvestmentString = document.getElementById("totalInvestmentValue").textContent;
+  // ===== Pembayaran pertama: Revenue + Install + VAT 11% + Materai 10.000 =====
+  const firstBase = totalRevenueForSummary + install;
+  const firstVAT = Math.floor(firstBase * 0.11);
+  const firstPayment = firstBase + firstVAT + 10000;
 
-            const monthlyRev = parseFloat(monthlyRevString.replace(/[Rp.\s]/g, '')) || 0;
-            const annualRev = parseFloat(annualRevString.replace(/[Rp.\s]/g, '')) || 0;
-            const totalInvestment = parseFloat(totalInvestmentString.replace(/[Rp.\s]/g, '')) || 0;
+  // ===== Pembayaran selanjutnya: Revenue + VAT 11% + Materai 10.000 =====
+  const nextBase = totalRevenueForSummary;
+  const nextVAT = Math.floor(nextBase * 0.11);
+  const nextPayment = nextBase + nextVAT + 10000;
 
-            const annualNetProfit = annualRev * 0.20;
-            const roi = totalInvestment !== 0 ? ((annualNetProfit - totalInvestment) / totalInvestment) * 100 : 0;
+  // Tampilkan ringkasan (HTML dengan styling)
+  const box = document.getElementById("summaryBox");
+  box.style.display = "block";
+  box.innerHTML = `
+<div style="font-size: 12px; font-weight: bold;">First Payment Amount Rp ${formatNumber(firstPayment)}</div>
+<div style="font-size: 10px; margin-left: 10px;">
+Included,<br>
+• Service: Rp ${formatNumber(totalRevenueForSummary)}<br>
+• Installation Fee: Rp ${formatNumber(install)}<br>
+• VAT 11%: Rp ${formatNumber(firstVAT)}<br>
+• Stamp: Rp 10.000
+</div>
+<br>
+<div style="font-size: 12px; font-weight: bold;">Next Payment AmountRp ${formatNumber(nextPayment)}</div>
+<div style="font-size: 10px; margin-left: 10px;">
+Included,<br>
+• Service: Rp ${formatNumber(totalRevenueForSummary)}<br>
+• VAT 11%: Rp ${formatNumber(nextVAT)}<br>
+• Stamp: Rp 10.000
+</div>
+`;
+}
 
-            const summaryTable = document.getElementById("summaryTable").querySelector("tbody");
-            summaryTable.innerHTML = `
-                <tr><td>Service Name</td><td>${serviceName}</td></tr>
-                <tr><td>Monthly Rev</td><td>${formatRupiah(monthlyRev)}</td></tr>
-                <tr><td>Annual Rev</td><td>${formatRupiah(annualRev)}</td></tr>
-                <tr><td>Annual Net Profit</td><td>${formatRupiah(annualNetProfit)}</td></tr>
-                <tr><td>Total Investment</td><td>${formatRupiah(totalInvestment)}</td></tr>
-                <tr><td>Return of Investment (ROI)</td><td>${roi.toFixed(2)}%</td></tr>
-            `;
-        });
 
-        function saveToLocalStorage() {
-            const data = {
-                projectName: projectNameInput.value,
-                customerName: customerNameInput.value,
-                serviceTable: serviceTableBody.innerHTML,
-                investmentTable: investmentTableBody.innerHTML
-            };
-            localStorage.setItem("masriData", JSON.stringify(data));
-        }
+  // init
+  populateServices(document.querySelector(".serviceSelect"));
+  const installInput = document.getElementById("installationFee");
+  if (installInput) installInput.value = formatNumber(getNumeric(installInput.value));
+</script>
 
-        function loadFromLocalStorage() {
-            const savedData = localStorage.getItem("masriData");
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                projectNameInput.value = data.projectName;
-                customerNameInput.value = data.customerName;
-                serviceTableBody.innerHTML = data.serviceTable;
-                investmentTableBody.innerHTML = data.investmentTable;
-                
-                serviceTableBody.querySelectorAll("tr").forEach(initServiceRow);
-                investmentTableBody.querySelectorAll("tr").forEach(initInvestmentRow);
-                
-                updateServiceCalculations();
-                updateTotalInvestment();
-            } else {
-                createServiceRow();
-                createInvestmentRow();
-            }
-        }
-
-        exportExcelBtn.addEventListener("click", () => {
-            const projectName = projectNameInput.value || 'Project';
-            const customerName = customerNameInput.value || 'Customer';
-
-            const serviceTableRows = Array.from(serviceTableBody.querySelectorAll('tr')).map(row => {
-                const cells = row.querySelectorAll('td');
-                return [
-                    cells[0].textContent,
-                    `"${cells[1].querySelector('select').value}"`,
-                    cells[2].querySelector('select').value,
-                    cells[3].querySelector('input').value,
-                    `"${cells[4].querySelector('select').value}"`,
-                    cells[5].querySelector('input').value
-                ].join(',');
-            }).join('\n');
-
-            const investmentTableRows = Array.from(investmentTableBody.querySelectorAll('tr')).map(row => {
-                const cells = row.querySelectorAll('td');
-                return [
-                    cells[0].textContent,
-                    `"${cells[1].querySelector('select').value}"`,
-                    `"${cells[2].querySelector('input').value}"`,
-                    cells[3].querySelector('select').value,
-                    cells[4].querySelector('input').value,
-                    cells[5].querySelector('input').value
-                ].join(',');
-            }).join('\n');
-
-            const summaryTableRows = Array.from(document.getElementById('summaryTable').querySelectorAll('tbody tr')).map(row => {
-                const cells = row.querySelectorAll('td');
-                return [
-                    `"${cells[0].textContent}"`,
-                    `"${cells[1].textContent}"`
-                ].join(',');
-            }).join('\n');
-
-            const csvContent = "data:text/csv;charset=utf-8," 
-                + "Project Name,Customer Name\n"
-                + `"${projectName}","${customerName}"\n\n`
-                + "Tabel Layanan\n"
-                + "No,Service,Contract,Monthly Rev,Discount,Annual Rev\n"
-                + serviceTableRows + "\n"
-                + `DISC,SUBTOTAL,VAT 11%,TOTAL,MATERAI,GRAND TOTAL\n`
-                + `${document.getElementById('discValue').textContent},${document.getElementById('subtotalValue').textContent},${document.getElementById('vatValue').textContent},${document.getElementById('totalValue').textContent},${document.getElementById('materaiValue').textContent},${document.getElementById('grandTotalValue').textContent}\n\n`
-                + "Tabel Investasi\n"
-                + "No,Description,Type,Qty,Unit Price,Total Price\n"
-                + investmentTableRows + "\n"
-                + `TOTAL INVESTMENT\n`
-                + `${document.getElementById('totalInvestmentValue').textContent}\n\n`
-                + "Ringkasan ROI\n"
-                + "Keterangan,Nilai\n"
-                + summaryTableRows;
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `MASRI_${projectName.replace(/\s/g, '_')}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-
-        document.addEventListener("DOMContentLoaded", () => {
-            loadFromLocalStorage();
-            
-            document.addEventListener('input', (e) => {
-                if (e.target.matches('input[type="text"], input[type="number"]')) {
-                    saveToLocalStorage();
-                }
-            });
-        });
-    </script>
 </body>
 </html>
