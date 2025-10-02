@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Managed Services</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -11,16 +12,16 @@
   <style>
   body {
     font-family: "Segoe UI", Tahoma, sans-serif;
-    background: linear-gradient(to right, #53b1f5, #ffffff);
-    margin: 20px;
+    background: linear-gradient(to right, #000000, #000000);
+    
   }
   .container {
     background: #fff;
-    border: 2px solid #0097a7;
+    border: 2px solid #000000;
     border-radius: 8px;
     padding: 20px;
-    width: 1300px;
-    height: 700px;
+    max-width: 1300px;
+    height: 850px;
     margin: auto;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   }
@@ -35,6 +36,7 @@
     display: flex;
     justify-content: space-between;
     margin: 10px 0;
+    flex-wrap: wrap;
   }
   .row label {
     font-weight: bold;
@@ -153,6 +155,22 @@
   text-align: right; /* biar angka di dalam input juga rata kanan */
 }
 
+/* Responsive fix for summary table */
+@media (max-width: 1024px) {
+  .summary {
+    width: 100% !important;
+    float: none !important;
+    margin-top: 20px;
+  }
+  .summary select,
+  .summary input {
+    float: none !important;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left !important;
+  }
+}
+
 
   .download {
     margin-top: 30px;
@@ -172,6 +190,80 @@
   font-family: inherit;
   line-height: 1.5;
   font-variant-numeric: tabular-nums;
+}
+
+/* ===========================
+   Tablet (max 1024px)
+   =========================== */
+@media (max-width: 1024px) {
+  .container {
+    padding: 15px;
+    height: auto; /* biar fleksibel */
+  }
+  .row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .row > .form-group {
+    width: 100% !important;
+    margin-bottom: 12px;
+    text-align: left !important;
+  }
+  input, select {
+    width: 100% !important;
+    font-size: 1rem;
+  }
+  .summary {
+    width: 100% !important;
+    float: none !important;
+    margin-top: 15px;
+  }
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  table {
+    min-width: 600px; /* biar tabel tidak hancur */
+    font-size: 0.9rem;
+  }
+}
+
+/* ===========================
+   Mobile (max 600px)
+   =========================== */
+@media (max-width: 600px) {
+  h2 {
+    font-size: 1.3rem;
+    text-align: center;
+    line-height: 1.4;
+  }
+  h3 {
+    font-size: 1rem;
+    margin-top: 12px;
+  }
+  .btn {
+    width: 100%;          /* full width biar gampang tap */
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+  input, select {
+    font-size: 0.9rem;
+  }
+  .row > .form-group label {
+    font-size: 0.85rem;
+  }
+  table {
+    font-size: 0.8rem;
+  }
+  table th,
+  table td {
+    padding: 4px 6px;
+  }
+  #summaryBox {
+    font-size: 0.85rem;
+    padding: 10px;
+    margin-top: 10px;
+  }
 }
 
 </style>
@@ -210,6 +302,7 @@
 </div>
 
   <h3>Hardware Table</h3>
+  <div class="table-wrapper">
   <table id="hardwareTable">
     <thead>
       <tr>
@@ -232,8 +325,10 @@
       </tr>
     </tbody>
   </table>
+  </div>
 
   <h3>Service Table</h3>
+  <div class="table-wrapper">
   <table id="serviceTable">
     <thead>
       <tr>
@@ -256,10 +351,10 @@
         </td>
         <td>
           <select class="contract">
+            <option selected>1</option>
             <option>12</option>
             <option>24</option>
             <option>36</option>
-            <option selected>1</option>
           </select>
         </td>
         <td class="revenue">0</td>
@@ -295,10 +390,23 @@
     </tr>
   </table>
 
-  <div class="download">
+  <div class="download" style="display:flex; align-items:center; gap:10px;">
   <button class="btn" id="summaryBtn" onclick="toggleSummary()">Show Monthly Summary</button>
+
+  <!-- Dropdown TOP -->
+  <select id="topSelect" style="padding:6px; border-radius:5px; border:1px solid #ccc;">
+    <option value="0" selected>Pilih TOP</option>
+    <option value="3">TOP 3</option>
+    <option value="6">TOP 6</option>
+    <option value="12">TOP 12</option>
+  </select>
 </div>
+
 <div id="summaryBox"></div>
+
+
+  
+
 
 </div>
 
@@ -345,6 +453,24 @@
     ["Biznet Dedicated Educationnet/Healthnet 3 Gbps",62400000,15000000],
     ["Biznet Dedicated Educationnet/Healthnet 4 Gbps",83200000,15000000],
     ["Biznet Dedicated Educationnet/Healthnet 10 Gbps",188500000,25000000],
+    ["Biznet Dedicated Hospitalitynet 80 Mbps",3120000,2000000],
+    ["Biznet Dedicated Hospitalitynet 100 Mbps",3900000,5000000],
+    ["Biznet Dedicated Hospitalitynet 120 Mbps",4446000,5000000],
+    ["Biznet Dedicated Hospitalitynet 160 Mbps",5928000,5000000],
+    ["Biznet Dedicated Hospitalitynet 200 Mbps",7410000,5000000],
+    ["Biznet Dedicated Hospitalitynet 240 Mbps",8424000,5000000],
+    ["Biznet Dedicated Hospitalitynet 280 Mbps",9828000,10000000],
+    ["Biznet Dedicated Hospitalitynet 320 Mbps",11232000,10000000],
+    ["Biznet Dedicated Hospitalitynet 360 Mbps",12636000,10000000],
+    ["Biznet Dedicated Hospitalitynet 400 Mbps",14040000,10000000],
+    ["Biznet Dedicated Hospitalitynet 500 Mbps",16575000,10000000],
+    ["Biznet Dedicated Hospitalitynet 600 Mbps",19890000,10000000],
+    ["Biznet Dedicated Hospitalitynet 700 Mbps",23205000,10000000],
+    ["Biznet Dedicated Hospitalitynet 800 Mbps",26520000,10000000],
+    ["Biznet Dedicated Hospitalitynet 900 Mbps",29835000,15000000],
+    ["Biznet Dedicated Hospitalitynet 1 Gbps",33150000,15000000],
+    ["Biznet Dedicated Hospitalitynet 1.2 Gbps",39780000,15000000],
+    ["Biznet Dedicated Hospitalitynet 1.6 Gbps",53040000,25000000],
   ];
 
   function populateServices(selectEl) {
@@ -379,6 +505,7 @@
       row.querySelector(".extPrice").innerText = formatNumber(ext);
     });
     recalcSummary();
+    if (document.getElementById("summaryBox").style.display === "block") showSummary();
   }
 
   function recalcService() {
@@ -398,6 +525,7 @@
     });
 
     recalcSummary();
+    if (document.getElementById("summaryBox").style.display === "block") showSummary();
   }
 
   function recalcSummary() {
@@ -422,30 +550,16 @@
     recalcService();
   }
 
-  // --- Input formatting untuk Qty & Unit Price ---
+  // Input handler
   document.addEventListener("input", e=>{
     if (e.target.classList.contains("qty") || e.target.classList.contains("unitPrice")) {
-      e.target.value = e.target.value.replace(/[^\d]/g,""); // hanya angka
+      e.target.value = e.target.value.replace(/[^\d]/g,""); 
     }
     if(e.target.classList.contains("qty") || e.target.classList.contains("unitPrice")) recalcHardware();
     if(e.target.classList.contains("contract")) recalcService();
     if(e.target.id === "installationFee") recalcSummary();
     if(e.target.id === "discount") recalcService();
   });
-
-  document.addEventListener("focus", e => {
-    if (e.target.classList.contains("qty") || e.target.classList.contains("unitPrice")) {
-      e.target.value = getNumeric(e.target.value) || "";
-    }
-  }, true);
-
-  document.addEventListener("blur", e => {
-    if (e.target.classList.contains("qty") || e.target.classList.contains("unitPrice")) {
-      const val = getNumeric(e.target.value);
-      e.target.value = val ? formatNumber(val) : "";
-      recalcHardware();
-    }
-  }, true);
 
   $(document).on('change', '.serviceSelect', function(e){
     handleServiceChange(this);
@@ -481,66 +595,82 @@
     const box = document.getElementById("summaryBox");
     const btn = document.getElementById("summaryBtn");
     if (box.style.display === "none" || box.style.display === "") {
-      // show
       showSummary();
       btn.textContent = "Hide Summary";
     } else {
-      // hide
       box.style.display = "none";
       btn.textContent = "Show Summary";
     }
   }
 
   function showSummary() {
-  // ambil total revenue untuk summary (sum dari revenue * 1, selalu contract=1)
-  let totalRevenueForSummary = 0;
-  document.querySelectorAll("#serviceTable tbody tr").forEach(row => {
-    let revenue = getNumeric(row.querySelector(".revenue").innerText);
-    totalRevenueForSummary += revenue;
-  });
+    let totalRevenueForSummary = 0;
+    document.querySelectorAll("#serviceTable tbody tr").forEach(row => {
+      let revenue = getNumeric(row.querySelector(".revenue").innerText);
+      totalRevenueForSummary += revenue;
+    });
 
-  // ambil installation fee (input)
-  const install = getNumeric(document.getElementById("installationFee").value);
+    const install = getNumeric(document.getElementById("installationFee").value);
+    let top = getNumeric(document.getElementById("topSelect").value);
+    if (top === 0) top = 1; 
 
-  // ===== Pembayaran pertama: Revenue + Install + VAT 11% + Materai 10.000 =====
-  const firstBase = totalRevenueForSummary + install;
-  const firstVAT = Math.floor(firstBase * 0.11);
-  const firstPayment = firstBase + firstVAT + 10000;
+    const firstBase = (totalRevenueForSummary * top) + install;
+    const firstVAT = Math.floor(firstBase * 0.11);
+    const firstPayment = firstBase + firstVAT + 10000;
 
-  // ===== Pembayaran selanjutnya: Revenue + VAT 11% + Materai 10.000 =====
-  const nextBase = totalRevenueForSummary;
-  const nextVAT = Math.floor(nextBase * 0.11);
-  const nextPayment = nextBase + nextVAT + 10000;
+    const nextBase = totalRevenueForSummary * top;
+    const nextVAT = Math.floor(nextBase * 0.11);
+    const nextPayment = nextBase + nextVAT + 10000;
 
-  // Tampilkan ringkasan (HTML dengan styling)
-  const box = document.getElementById("summaryBox");
-  box.style.display = "block";
-  box.innerHTML = `
-<div style="font-size: 12px; font-weight: bold;">First Payment Amount Rp ${formatNumber(firstPayment)}</div>
-<div style="font-size: 10px; margin-left: 10px;">
-Included,<br>
-• Service: Rp ${formatNumber(totalRevenueForSummary)}<br>
-• Installation Fee: Rp ${formatNumber(install)}<br>
-• VAT 11%: Rp ${formatNumber(firstVAT)}<br>
-• Stamp: Rp 10.000
-</div>
-<br>
-<div style="font-size: 12px; font-weight: bold;">Next Payment AmountRp ${formatNumber(nextPayment)}</div>
-<div style="font-size: 10px; margin-left: 10px;">
-Included,<br>
-• Service: Rp ${formatNumber(totalRevenueForSummary)}<br>
-• VAT 11%: Rp ${formatNumber(nextVAT)}<br>
-• Stamp: Rp 10.000
-</div>
-`;
-}
-
+    const box = document.getElementById("summaryBox");
+    box.style.display = "block";
+    box.innerHTML = `
+      <div style="font-size: 12px; font-weight: bold;">First Payment Amount Rp ${formatNumber(firstPayment)}</div>
+      <div style="font-size: 10px; margin-left: 10px;">
+        Included,<br>
+        * Service (x${top}): Rp ${formatNumber(totalRevenueForSummary * top)}<br>
+        * Installation Fee: Rp ${formatNumber(install)}<br>
+        * VAT 11%: Rp ${formatNumber(firstVAT)}<br>
+        * Stamp: Rp 10.000
+      </div>
+      <br>
+      <div style="font-size: 12px; font-weight: bold;">Next Payment Amount Rp ${formatNumber(nextPayment)}</div>
+      <div style="font-size: 10px; margin-left: 10px;">
+        Included,<br>
+        * Service (x${top}): Rp ${formatNumber(totalRevenueForSummary * top)}<br>
+        * VAT 11%: Rp ${formatNumber(nextVAT)}<br>
+        * Stamp: Rp 10.000
+      </div>
+    `;
+  }
 
   // init
   populateServices(document.querySelector(".serviceSelect"));
   const installInput = document.getElementById("installationFee");
   if (installInput) installInput.value = formatNumber(getNumeric(installInput.value));
+
+  // Auto update kalau TOP berubah
+  document.getElementById("topSelect").addEventListener("change", function() {
+    if (document.getElementById("summaryBox").style.display === "block") {
+      showSummary();
+    }
+  });
+  // Auto update kalau TOP berubah
+document.getElementById("topSelect").addEventListener("change", function() {
+  if (document.getElementById("summaryBox").style.display === "block") {
+    showSummary();
+  }
+});
+
+// 🔥 Auto update kalau Installation Fee berubah
+document.getElementById("installationFee").addEventListener("input", function() {
+  if (document.getElementById("summaryBox").style.display === "block") {
+    showSummary();
+  }
+});
+
 </script>
+
 
 </body>
 </html>
